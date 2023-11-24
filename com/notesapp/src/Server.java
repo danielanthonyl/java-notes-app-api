@@ -1,5 +1,6 @@
-package com.notesapp;
+package com.notesapp.src;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import com.sun.net.httpserver.HttpHandler;
@@ -10,17 +11,13 @@ public class Server {
     private InetSocketAddress socketAddress;
     private Boolean isRunning;
 
-    public Server(String hostname, int port) {
-        try {
-            this.socketAddress = new InetSocketAddress(hostname, port);
-            this.server = HttpServer.create(socketAddress, 0);
-            this.isRunning = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Server(String hostname, int port) throws IOException {
+        this.socketAddress = new InetSocketAddress(hostname, port);
+        this.server = HttpServer.create(socketAddress, 0);
+        this.isRunning = false;
     }
 
-    public void Start() {
+    public void start() {
         if(isRunning) {
             throw new RuntimeException("Server is already running");
         }
