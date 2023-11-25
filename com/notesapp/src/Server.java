@@ -31,15 +31,11 @@ public class Server {
 
     public void addContext(String path, HttpHandler handler) {
         if(isRunning) {
-            throw new RuntimeException("cannot addd contexts after server is running.");
+            throw new RuntimeException("cannot add contexts after server is running.");
         }
 
         if(server != null){
             server.createContext(path, handler);
         }
-    }
-
-    public void checkStatus() {
-        System.out.println(isRunning ? "server is running" : "server is not running");
     }
 }
