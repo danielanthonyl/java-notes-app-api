@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -46,152 +44,135 @@ public class Notes implements HttpHandler {
         }
     }
 
-    public void addNote(HttpExchange exchange) throws IOException {
-        Note note = mapper.readValue(exchange.getRequestBody(), Note.class);
+    public void addNote(HttpExchange exchange) {
+        try {
+            Note note = mapper.readValue(exchange.getRequestBody(), Note.class);
 
-        if (note == null) {
-            Response response = new Response("Error adding note");
-            String jsonResponse = mapper.writeValueAsString(response);
+            if (note == null) {
+                Response response = new Response("Error adding note");
+                response.sendResponse(exchange, mapper, 500);
+            }
 
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(500, jsonResponse.length());
-            exchange.getResponseBody().write(jsonResponse.getBytes());
+            if (note.body == null && note.title == null) {
+                Response response = new Response("Title and Body is mandatory.");
+                response.sendResponse(exchange, mapper, 400);
+            }
 
-            exchange.close();
-            throw new IOException("Error serializing note");
+            Response response = new Response("Note successfully added");
+            response.sendResponse(exchange, mapper, 201);
+            notes.add(note);
+            System.out.println("new note added! There are " + notes.size() + " notes in the list.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        Response response = new Response("Note successfully added");
-        String jsonResponse = mapper.writeValueAsString(response);
-
-        notes.add(note);
-        System.out.println("new note added! There are " + notes.size() + " notes in the list.");
-
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(201, jsonResponse.length());
-        exchange.getResponseBody().write(jsonResponse.getBytes());
-        exchange.close();
     }
 
-    public void getNotes(HttpExchange exchange) throws IOException {
-        Map<String, String> query = queryParser(exchange.getRequestURI().getQuery());
+    public void getNotes(HttpExchange exchange) {
+        try {
+            Map<String, String> query = queryParser(exchange.getRequestURI().getQuery());
 
-        // System.out.println(query);
+            // retrieve all notes
+            if (query == null) {
+                Response response = new Response("List of notes successfully retrieved.", notes);
+                response.sendResponse(exchange, mapper, 200);
+                return;
+            }
 
-        // retrieve a note by id
-        if (query != null) {
+            // retrieve a note by id
             String id = query.get("id");
 
-            if (id == null)
-                throw new IOException("couldn't find any id associated with a note");
+            if (id != null) {
+                Note foundNote = notes.stream()
+                        .filter(note -> note.id.equals(UUID.fromString(id)))
+                        .findFirst()
+                        .orElse(null);
 
-            Note foundNote = notes.stream()
-                    .filter(note -> note.id.equals(UUID.fromString(id)))
-                    .findFirst()
-                    .orElse(null);
-
-            if (foundNote == null) {
-                String errorMessage = String.format("no note found for id: %s", id);
-                Response response = new Response(errorMessage);
-                response.sendResponse(exchange, mapper, 400);
-
-                throw new IOException(errorMessage);
+                Response response = new Response(
+                        String.format("Successfully retrieved a note by id: %s", id),
+                        foundNote);
+                response.sendResponse(exchange, mapper, 200);
             }
-
-            Response response = new Response("note retrieved sucessfully", foundNote);
-            response.sendResponse(exchange, mapper, 200);
-            System.out.println(String.format("user retrieved note with id %s successfully", id));
-            return;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        // retrieve all notes
-        Response response = new Response("List of notes successfully retrieved.", notes);
-        String jsonResponse = mapper.writeValueAsString(response);
-
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, jsonResponse.length());
-        exchange.getResponseBody().write(jsonResponse.getBytes());
-        exchange.close();
     }
 
-    public void patchNote(HttpExchange exchange) throws IOException {
-        Note requestBody = mapper.readValue(exchange.getRequestBody(), Note.class);
+    public void patchNote(HttpExchange exchange) {
+        try {
+            Note requestBody = mapper.readValue(exchange.getRequestBody(), Note.class);
 
-        if (requestBody.id == null)
-            throw new IOException("parameter id is required for patching a note");
-
-        if (requestBody.title == null && requestBody.body == null)
-            throw new IOException("either pass a body or a title in order to update a note");
-
-        // notes.replaceAll(note -> {
-        // if (note.id.equals(requestBody.id)) {
-        // Note updatedNote = new Note();
-
-        // updatedNote.id = requestBody.id;
-        // updatedNote.body = requestBody.body != null ? requestBody.body : note.body;
-        // updatedNote.title = requestBody.title != null ? requestBody.title :
-        // note.title;
-
-        // return updatedNote;
-        // }
-
-        // return note;
-        // });
-
-        Note[] updatedNote = new Note[1];
-
-        notes.replaceAll(note -> {
-            if (note.id.equals(requestBody.id)) {
-                updatedNote[0] = note;
-
-                return new Note(
-                        note.id,
-                        Objects.requireNonNullElse(requestBody.title, note.title),
-                        Objects.requireNonNullElse(requestBody.body, note.body));
-
+            if (requestBody.id == null) {
+                Response response = new Response("parameter id is required for patching a note");
+                response.sendResponse(exchange, mapper, 400);
             }
 
-            return note;
+            if (requestBody.title == null && requestBody.body == null) {
+                Response response = new Response("either pass a body or a title in order to update a note");
+                response.sendResponse(exchange, mapper, 400);
+            }
 
-        });
+            Note[] updatedNote = new Note[1];
 
-        Response response = new Response("Note updated successfully", updatedNote[0]);
-        response.sendResponse(exchange, mapper, 200);
+            notes.replaceAll(note -> {
+                if (note.id.equals(requestBody.id)) {
+                    updatedNote[0] = note;
+
+                    return new Note(
+                            note.id,
+                            Objects.requireNonNullElse(requestBody.title, note.title),
+                            Objects.requireNonNullElse(requestBody.body, note.body));
+
+                }
+
+                return note;
+
+            });
+
+            Response response = new Response("Note updated successfully", updatedNote[0]);
+            response.sendResponse(exchange, mapper, 200);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void deleteNote(HttpExchange exchange) throws IOException {
-        Map<String, String> query = queryParser(exchange.getRequestURI().getQuery());
+    public void deleteNote(HttpExchange exchange) {
+        try {
+            Map<String, String> query = queryParser(exchange.getRequestURI().getQuery());
 
-        String id = query.get("id");
+            if (query == null) {
+                notes.clear();
+                Response response = new Response("successfully deleted all notes", notes);
+                response.sendResponse(exchange, mapper, 200);
 
-        if (id == null)
-            throw new IOException("query parameter id is mandatory for deleting a note.");
+                return;
+            }
 
-        Note[] removedNote = new Note[1];
+            String id = query.get("id");
+            Note[] removedNote = new Note[1];
 
-        Boolean isRemoved = notes.removeIf(note -> {
-            Boolean shouldRemove = note.id.equals(UUID.fromString(id));
+            Boolean isRemoved = notes.removeIf(note -> {
+                Boolean shouldRemove = note.id.equals(UUID.fromString(id));
 
-            if (shouldRemove)
-                removedNote[0] = note;
+                if (shouldRemove)
+                    removedNote[0] = note;
 
-            return shouldRemove;
-        });
+                return shouldRemove;
+            });
 
-        if (!isRemoved)
-            throw new IOException("Couldn't find note with id " + id);
+            if (id == null || !isRemoved) {
+                Response response = new Response(
+                        String.format("couldn't find or couldn't remove note with provided id %s", id));
+                response.sendResponse(exchange, mapper, 400);
+            }
 
-        Response response = new Response("note successfully removed.", removedNote[0]);
-        String jsonResponse = mapper.writeValueAsString(response);
-
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, jsonResponse.length());
-        exchange.getResponseBody().write(jsonResponse.getBytes());
-        exchange.close();
+            Response response = new Response("note successfully removed.", removedNote[0]);
+            response.sendResponse(exchange, mapper, 200);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Map<String, String> queryParser(String query) {
-
         if (query == null || !query.contains("="))
             return null;
 
@@ -228,6 +209,12 @@ class Response {
     public String message;
     public Object data;
 
+    /*
+     * refactor this so instead of having multiple constructors, we will have
+     * multiple
+     * static classes sendResponse. This sendResponse will do the same as the
+     * constructors.
+     */
     public Response(String msg) {
         this.message = msg;
     }
@@ -250,5 +237,9 @@ class Response {
         exchange.sendResponseHeaders(statusCode, jsonResponse.length());
         exchange.getResponseBody().write(jsonResponse.getBytes());
         exchange.close();
+
+        if (statusCode > 399) {
+            throw new IOException(message);
+        }
     }
 }

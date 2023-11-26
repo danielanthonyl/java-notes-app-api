@@ -7,7 +7,6 @@ public class Main {
             Server server = new Server("localhost", 3000);
             server.addContext("/notes", new Notes());
             server.start();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
