@@ -1,13 +1,10 @@
 package com.notesapp.src;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -50,7 +47,14 @@ public class Notes implements HttpHandler {
     }
 
     public void addNote(HttpExchange exchange) {
+
         try {
+            // Map<String, Object> newMap = new HashMap<>();
+            // Note nt = database.deserialize(newMap,Note.class);
+            // List<Note> notez = database.findAll2("SELECT * FROM TABLE(get_nts())",
+            // Note.class);
+            // System.out.println(notez.get(0).id);
+
             Note note = mapper.readValue(exchange.getRequestBody(), Note.class);
 
             if (note == null) {
@@ -79,17 +83,9 @@ public class Notes implements HttpHandler {
 
             // retrieve all notes
             if (query == null) {
-                List<String> queryResult = database.findAll("SELECT * FROM TABLE(get_nts())");
-                List<Note> noteList = new ArrayList<Note>();
-                queryResult.forEach(note -> {
-                    try {
-                        noteList.add(mapper.readValue(note.toString(), Note.class));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
-                });
+                Iterable<Note> queryResult = database.findAll("SELECT * FROM TABLE(get_nts())", Note.class);
 
-                Response response = new Response("List of notes successfully retrieved.", noteList);
+                Response response = new Response("List of notes successfully retrieved.", queryResult);
                 response.sendResponse(exchange, mapper, 200);
                 return;
             }
@@ -99,11 +95,14 @@ public class Notes implements HttpHandler {
 
             if (id != null) {
                 Database database = new Database();
-                String queryResult = database.findUnique(String.format("SELECT * FROM TABLE(get_nts('%s'))", id));
+                Note queryResult = database.findUnique(
+                        String.format("SELECT * FROM TABLE(get_nts('%s'))", id),
+                        Note.class);
 
                 Response response = new Response(
                         String.format("Successfully retrieved a note by id: %s", id),
-                        mapper.readValue(queryResult, Note.class));
+                        queryResult);
+
                 response.sendResponse(exchange, mapper, 200);
             }
         } catch (Exception e) {
@@ -157,13 +156,7 @@ public class Notes implements HttpHandler {
             Response response = new Response("note successfully removed.");
             response.sendResponse(exchange, mapper, 200);
         } catch (Exception e) {
-            try {
-                Response response = new Response("Couldn't remove note.");
-                response.sendResponse(exchange, mapper, 500);
-                e.printStackTrace();
-            } catch (IOException error) {
-                error.printStackTrace();
-            }
+            e.printStackTrace();
         }
     }
 
@@ -214,7 +207,7 @@ class Response {
         this.message = msg;
     }
 
-    public Response(String msg, List<Note> data) {
+    public Response(String msg, Iterable<Note> data) {
         this.data = data;
         this.message = msg;
     }
