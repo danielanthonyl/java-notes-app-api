@@ -1,0 +1,6 @@
+-- 2022/11/28
+CREATE TABLE nts (
+    id VARCHAR(20) PRIMARY KEY,
+    title VARCHAR(100),
+    body VARCHAR(1000)
+);
