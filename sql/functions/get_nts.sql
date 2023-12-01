@@ -13,3 +13,4 @@ CREATE OR REPLACE FUNCTION get_nts(
       RETURN;
     END get_nts;
 /
+

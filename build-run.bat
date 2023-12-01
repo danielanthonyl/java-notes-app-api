@@ -11,11 +11,11 @@ set "comma="
 set "parentDirectory=src"
 
 for /r %srcPath% %%F in (*.java) do (
-    for %%a in (%%F) do for %%b in ("%%~dpa\.") do (
-        if %%~nxb equ !parentDirectory! (
-            set "parentDirectory=%%~nxb"
+    for %%B in ("%%~dpF\.") do (
+        if %%~nxB equ !parentDirectory! (
+            set "parentDirectory=%%~nxB"
         ) else (
-            set "parentDirectory=!parentDirectory!\%%~nxb"
+            set "parentDirectory=!parentDirectory!\%%~nxB"
         )
     )
 
