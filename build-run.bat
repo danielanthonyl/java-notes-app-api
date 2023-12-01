@@ -1,17 +1,49 @@
 @echo off
-
+setLocal enabledelayedexpansion
 cls
 
-set "packagePath=.\com\notesapp\src"
-set "libraries=.\lib\jackson-core-2.16.0.jar;.\lib\jackson-databind-2.16.0.jar;.\lib\jackson-annotations-2.16.0.jar;.\lib\ojdbc10.jar;."
+@REM process src files
+set "srcPath=.\com\notesapp"
 
-javac -cp ^
-    %libraries% ^
-    %packagePath%\Notes.java ^
-    %packagePath%\Server.java ^
-    %packagePath%\Database.java ^
-    %packagePath%\Main.java
+set "files="
+set "fileCount=0"
+set "comma="
+set "parentDirectory=src"
 
-java -cp ^
-    %libraries% ^
-    com.notesapp.src.Main
+for /r %srcPath% %%F in (*.java) do (
+    for %%a in (%%F) do for %%b in ("%%~dpa\.") do (
+        if %%~nxb equ !parentDirectory! (
+            set "parentDirectory=%%~nxb"
+        ) else (
+            set "parentDirectory=!parentDirectory!\%%~nxb"
+        )
+    )
+
+    echo processing file: !parentDirectory!\%%~nxF
+
+    set "files=!files! !srcPath!\!parentDirectory!\%%~nxF"
+)
+
+
+@REM process libraries
+
+set "libsPath=.\lib"
+set "libsIndex=0"
+set "separator="
+set "libraries="
+
+for %%F in (%libsPath%\*.jar) do (
+    if not !libsIndex! equ 0 (
+        set "separator=;"
+    )
+
+    set /a libsIndex+=1
+    echo processing lib: %%~nxF
+    set "libraries=!libraries!!separator!!libsPath!\%%~nxF"
+)
+
+set "libraries=!libraries!;."
+
+javac -cp %libraries% %files%
+
+java -cp %libraries% com.notesapp.src.Main

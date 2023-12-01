@@ -49,12 +49,6 @@ public class Notes implements HttpHandler {
     public void addNote(HttpExchange exchange) {
 
         try {
-            // Map<String, Object> newMap = new HashMap<>();
-            // Note nt = database.deserialize(newMap,Note.class);
-            // List<Note> notez = database.findAll2("SELECT * FROM TABLE(get_nts())",
-            // Note.class);
-            // System.out.println(notez.get(0).id);
-
             Note note = mapper.readValue(exchange.getRequestBody(), Note.class);
 
             if (note == null) {
