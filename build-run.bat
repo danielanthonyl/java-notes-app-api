@@ -10,20 +10,19 @@ set "fileCount=0"
 set "comma="
 set "parentDirectory=src"
 
-for /r %srcPath% %%F in (*.java) do (
-    for %%B in ("%%~dpF\.") do (
-        if %%~nxB equ !parentDirectory! (
-            set "parentDirectory=%%~nxB"
-        ) else (
-            set "parentDirectory=!parentDirectory!\%%~nxB"
-        )
-    )
-
-    echo processing file: !parentDirectory!\%%~nxF
-
-    set "files=!files! !srcPath!\!parentDirectory!\%%~nxF"
+@REM cleanup old builds
+for /r %srcPath% %%F in (*.class) do (
+    del %%F
 )
 
+for /r %srcPath% %%F in (*.java) do (
+    set "relativePath=%%F"
+    set "relativePath=!relativePath:%CD%\=!"
+
+    echo processing file: !relativePath!
+
+    set "files=!files! !relativePath!"
+)
 
 @REM process libraries
 
@@ -47,3 +46,4 @@ set "libraries=!libraries!;."
 javac -cp %libraries% %files%
 
 java -cp %libraries% com.notesapp.src.Main
+

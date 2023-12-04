@@ -1,6 +1,7 @@
 package com.notesapp.src;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -27,7 +28,6 @@ public class Database {
         this.url = "jdbc:oracle:thin:@localhost:1521:ntsdb";
         this.username = "woedarc";
         this.password = "3306";
-
         this.connection = null;
     }
 
@@ -70,23 +70,27 @@ public class Database {
         }
     }
 
-    public final <T> List<T> findAll(String sql, Class<T> instanceClass) throws Exception {
+    public final <T> T[] findAll(String sql, Class<T> instanceClass) throws Exception {
         start();
 
         Statement statement = connection.createStatement();
         Boolean hasResultSetObject = statement.execute(sql);
         List<T> results = new ArrayList<T>();
+        int rowCount = 0;
 
         if (hasResultSetObject) {
             ResultSet resultSet = statement.getResultSet();
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
             Map<String, Object> result = new HashMap<String, Object>();
+            
 
             while (resultSet.next()) {
-                for (int column = 1; column < columnCount; column++) {
+                rowCount++;
+                for (int column = 1; column <= columnCount; column++) {
                     String columnName = metaData.getColumnName(column).toLowerCase();
                     Object columnValue = resultSet.getObject(column);
+                    System.out.println(columnName);
 
                     try {
                         result.put(columnName, UUID.fromString(columnValue.toString()));
@@ -107,7 +111,10 @@ public class Database {
         statement.close();
         close();
 
-        return results;
+        @SuppressWarnings("unchecked")
+        T[] resultList = results.toArray((T[]) Array.newInstance(instanceClass, rowCount));
+
+        return resultList;
     }
 
     public <T> T findUnique(String sql, Class<T> classInstance) throws Exception {
@@ -222,17 +229,20 @@ public class Database {
         return instance;
     }
 
-    // private String generateJson(int columnCount, ResultSet resultSet, ResultSetMetaData metaData) throws SQLException {
-    //     String result = "";
+    // private String generateJson(int columnCount, ResultSet resultSet,
+    // ResultSetMetaData metaData) throws SQLException {
+    // String result = "";
 
-    //     for (int column = 1; column <= columnCount; column++) {
-    //         String columnName = String.format("\"%s\"", metaData.getColumnName(column).toLowerCase());
-    //         String columnValue = String.format("\"%s\"", resultSet.getString(columnName));
-    //         result += String.format("%s: %s", columnName, columnValue);
-    //         result += column == columnCount ? "" : ",";
-    //     }
+    // for (int column = 1; column <= columnCount; column++) {
+    // String columnName = String.format("\"%s\"",
+    // metaData.getColumnName(column).toLowerCase());
+    // String columnValue = String.format("\"%s\"",
+    // resultSet.getString(columnName));
+    // result += String.format("%s: %s", columnName, columnValue);
+    // result += column == columnCount ? "" : ",";
+    // }
 
-    //     return result;
+    // return result;
     // }
 
     private String sqlFileParser(String filePath) {

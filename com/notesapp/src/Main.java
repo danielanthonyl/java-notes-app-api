@@ -2,6 +2,8 @@ package com.notesapp.src;
 
 import java.io.IOException;
 
+import com.notesapp.src.adapters.notes.Notes;
+
 public class Main {
     public static void main(String... args) {
         try {
