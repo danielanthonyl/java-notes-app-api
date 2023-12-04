@@ -1,0 +1,26 @@
+_id: req_6443ca69c8ee431b90df0285566bd134
+type: Request
+parentId: fld_424db76f0d5742f18477aa0a84b23852
+modified: 1701465910656
+created: 1701465899981
+url: http://localhost:3000/notes
+name: List By Id
+description: ""
+method: GET
+body: {}
+parameters:
+  - name: id
+    value: ab56b809-734a-46c7-8b40-d6b7f52f82c0
+    disabled: false
+headers:
+  - name: User-Agent
+    value: Insomnia/2023.5.7
+authentication: {}
+metaSortKey: -1701465899981
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

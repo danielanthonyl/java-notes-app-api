@@ -1,0 +1,23 @@
+_id: req_c60fbb9010654bfbb2c70d6ccc19b2b7
+type: Request
+parentId: fld_424db76f0d5742f18477aa0a84b23852
+modified: 1701465965415
+created: 1701465956857
+url: http://localhost:3000/notes
+name: Delete All
+description: ""
+method: DELETE
+body: {}
+parameters: []
+headers:
+  - name: User-Agent
+    value: Insomnia/2023.5.7
+authentication: {}
+metaSortKey: -1701465787875
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

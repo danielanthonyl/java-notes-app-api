@@ -1,0 +1,17 @@
+_id: ut_90d48c1326e24ea1b18baaefe90cfd81
+type: UnitTest
+parentId: uts_8fbf88e8dba348a4920c697fa7f0e07d
+modified: 1701466471124
+created: 1701465994683
+requestId: req_c726a0ab1f3041c7b6a91606e578670b
+name: Returns 200
+code: |-
+  const response = await insomnia.send();
+  const dataResponse = {
+  	message: "Note successfully added",
+  	data: null,
+  };
+
+  expect(JSON.parse(response.data).message).to.equal(dataResponse.message);
+  expect(JSON.parse(response.data).data).to.equal(dataResponse.data);
+  expect(response.status).to.equal(201);

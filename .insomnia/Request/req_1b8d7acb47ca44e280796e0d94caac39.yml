@@ -1,0 +1,31 @@
+_id: req_1b8d7acb47ca44e280796e0d94caac39
+type: Request
+parentId: fld_424db76f0d5742f18477aa0a84b23852
+modified: 1701465867016
+created: 1701465762479
+url: http://localhost:3000/notes
+name: Patch
+description: ""
+method: PATCH
+body:
+  mimeType: application/json
+  text: |-
+    {
+    	"id": "11fe9f45-0afa-47a9-945d-4263584c0714",
+    	"body": "updated note1"
+    }
+parameters: []
+headers:
+  - name: Content-Type
+    value: application/json
+  - name: User-Agent
+    value: Insomnia/2023.5.7
+authentication: {}
+metaSortKey: -1701465787975
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

@@ -1,0 +1,31 @@
+_id: req_c726a0ab1f3041c7b6a91606e578670b
+type: Request
+parentId: fld_424db76f0d5742f18477aa0a84b23852
+modified: 1701465967960
+created: 1701465810662
+url: http://localhost:3000/notes
+name: Add
+description: ""
+method: POST
+body:
+  mimeType: application/json
+  text: |
+    {
+    	"title": "note 1",
+    	"body": "lorem ipsum" 
+    }
+parameters: []
+headers:
+  - name: Content-Type
+    value: application/json
+  - name: User-Agent
+    value: Insomnia/2023.5.7
+authentication: {}
+metaSortKey: -1701465900081
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global
