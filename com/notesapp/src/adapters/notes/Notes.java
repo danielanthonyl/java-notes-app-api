@@ -1,6 +1,5 @@
 package com.notesapp.src.adapters.notes;
 
-import com.notesapp.src.HttpFactory;
 import com.notesapp.src.dataAccess.NotesRepository;
 import com.notesapp.src.domain.useCases.notes.AddNoteUseCase;
 import com.notesapp.src.domain.useCases.notes.DeleteNoteByIdUseCase;
@@ -8,6 +7,7 @@ import com.notesapp.src.domain.useCases.notes.DeleteNotesUseCase;
 import com.notesapp.src.domain.useCases.notes.GetAllNotesUseCase;
 import com.notesapp.src.domain.useCases.notes.GetNoteByIdUseCase;
 import com.notesapp.src.domain.useCases.notes.UpdateNoteUseCase;
+import com.notesapp.src.utils.HttpFactory;
 
 public class Notes extends HttpFactory {
     NotesRepository notesRepository;

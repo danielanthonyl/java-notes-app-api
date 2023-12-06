@@ -1,4 +1,4 @@
-package com.notesapp.src;
+package com.notesapp.src.utils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

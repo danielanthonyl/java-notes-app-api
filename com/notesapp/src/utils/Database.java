@@ -1,11 +1,6 @@
-package com.notesapp.src;
+package com.notesapp.src.utils;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -99,7 +94,7 @@ public class Database {
                     }
                 }
 
-                T classInstance = injectDataToInstance(result, instanceClass);
+                T classInstance = Utils.injectDataToInstance(result, instanceClass);
                 results.add(classInstance);
             }
 
@@ -147,7 +142,7 @@ public class Database {
                 resultSet.close();
             }
 
-            T instance = injectDataToInstance(result, classInstance);
+            T instance = Utils.injectDataToInstance(result, classInstance);
 
             System.out.println(String.format("\n called sql: %s \n", sql));
 
@@ -190,7 +185,7 @@ public class Database {
         start();
 
         try {
-            String sqlContent = sqlFileParser(sqlFilePath);
+            String sqlContent = Utils.sqlFileParser(sqlFilePath);
 
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sqlContent);
@@ -206,62 +201,6 @@ public class Database {
             e.printStackTrace();
         } finally {
             close();
-        }
-    }
-
-    /*
-     * Private helper methods
-     */
-    private <T> T injectDataToInstance(Map<String, Object> data, Class<T> instanceClass) throws Exception {
-        Constructor<T> constructor = instanceClass.getDeclaredConstructor();
-        T instance = constructor.newInstance();
-        Field[] fields = instance.getClass().getDeclaredFields();
-
-        for (int index = 0; index < fields.length; index++) {
-            Field field = fields[index];
-            Object dataValue = data.get(field.getName());
-
-            if (dataValue != null) {
-                field.set(instance, dataValue);
-            }
-        }
-
-        return instance;
-    }
-
-    // private String generateJson(int columnCount, ResultSet resultSet,
-    // ResultSetMetaData metaData) throws SQLException {
-    // String result = "";
-
-    // for (int column = 1; column <= columnCount; column++) {
-    // String columnName = String.format("\"%s\"",
-    // metaData.getColumnName(column).toLowerCase());
-    // String columnValue = String.format("\"%s\"",
-    // resultSet.getString(columnName));
-    // result += String.format("%s: %s", columnName, columnValue);
-    // result += column == columnCount ? "" : ",";
-    // }
-
-    // return result;
-    // }
-
-    private String sqlFileParser(String filePath) {
-        try {
-            Path path = Path.of(filePath);
-            List<String> lines = Files.readAllLines(path);
-
-            lines.removeIf(line -> line.contains("--") || line.length() < 1);
-
-            String joinedLines = String
-                    .join("\n", lines)
-                    .replaceAll(";", "");
-
-            System.out.println(String.format("\n QUERY EXECUTED: \n %s \n", joinedLines));
-
-            return joinedLines;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }

@@ -2,8 +2,8 @@ package com.notesapp.src.dataAccess;
 
 import java.util.UUID;
 
-import com.notesapp.src.Database;
 import com.notesapp.src.domain.entities.Note;
+import com.notesapp.src.utils.Database;
 
 public class NotesRepository {
     private Database database;
